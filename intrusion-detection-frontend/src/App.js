@@ -5,9 +5,8 @@ function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeModel, setActiveModel] = useState(null);
-
-  const exampleNormal = [0,0,1,1,181,5450,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,511,511,0.0,0.0,0.0,0.0,1.0,0.0,0.0,255,255,1.0,0.0,0.0,0.0,0.0,0.0,0.0];
-  const exampleAttack = [0,0,2,2,239,486,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1.0,1.0,0.0,0.0,0.0,1.0,1.0,255,255,0.0,0.0,0.0,0.0,1.0,1.0,0.0];
+  const exampleNormal = [0,0,1,1,181,5450,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,511,511,0.0,0.0,0.0,0.0,1.0,0.0,0.0,255,255,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0];
+  const exampleAttack = [0,0,2,2,239,486,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1.0,1.0,0.0,0.0,0.0,1.0,1.0,255,255,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0];
 
   const handleChange = (index, value) => {
     const newFeatures = [...features];
@@ -21,14 +20,20 @@ function App() {
   };
 
   const handlePredict = async (model) => {
+    const numericFeatures = features.map(Number);
+    if (numericFeatures.length !== 41 || numericFeatures.some((v) => Number.isNaN(v))) {
+      setResult({ error: "Features must be 41 numeric values. Check inputs." });
+      return;
+    }
+
     setLoading(true);
     setActiveModel(model);
     setResult(null);
     try {
-      const response = await fetch(`https://intrusion-detection-api-3.onrender.com/predict/${model}`, {
+      const response = await fetch(`http://127.0.0.1:8000/predict/${model}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(features.map(Number)),
+        body: JSON.stringify(numericFeatures),
       });
       const data = await response.json();
       setResult(data);
